@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'kelas_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -546,9 +547,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
+        if (index == 1) {
+          // Navigate to Kelas Screen
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const KelasScreen()),
+          );
+        } else {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
