@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'kelas_screen.dart';
+import 'notifikasi_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -551,6 +552,11 @@ class _HomeScreenState extends State<HomeScreen> {
           // Navigate to Kelas Screen
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const KelasScreen()),
+          );
+        } else if (index == 2) {
+          // Navigate to Notifikasi Screen
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const NotifikasiScreen()),
           );
         } else {
           setState(() {
