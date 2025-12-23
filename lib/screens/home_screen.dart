@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   
   // User name - can be edited from profile later
-  String userName = 'Dandy Candra\nPratama';
+  String userName = 'Moh. Wldan Maulidy';
 
   @override
   Widget build(BuildContext context) {

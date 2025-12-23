@@ -9,12 +9,12 @@ class ProfilScreen extends StatefulWidget {
 
 class _ProfilScreenState extends State<ProfilScreen> {
   // User data - editable
-  String userName = 'Dandy Candra Pratama';
-  String nim = '1202200001';
-  String email = 'dandy.candra@student.telkomuniversity.ac.id';
-  String jurusan = 'D4 Sistem Multimedia';
-  String fakultas = 'Fakultas Ilmu Terapan';
-  String angkatan = '2020';
+  String userName = 'Moh. Wildan Maulidy';
+  String nim = '2022020100018';
+  String email = 'wildan.maulidy@student.UIMuniversity.ac.id';
+  String jurusan = 'TEKNIK INFORMATIKA';
+  String fakultas = 'Fakultas Teknik';
+  String angkatan = '2022';
   String noTelp = '081234567890';
 
   @override
