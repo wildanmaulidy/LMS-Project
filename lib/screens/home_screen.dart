@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'kelas_screen.dart';
 import 'notifikasi_screen.dart';
+import 'profil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -85,47 +86,54 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          // Role Badge
-          Container(
-            padding: const EdgeInsets.only(left: 12, right: 4, top: 4, bottom: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7F1D1D).withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: const Color(0xFFF87171).withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'MAHASISWA',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
+          // Role Badge - Tap to go to profile
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ProfilScreen()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.only(left: 12, right: 4, top: 4, bottom: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7F1D1D).withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: const Color(0xFFF87171).withValues(alpha: 0.3),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF991B1B),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 2,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'MAHASISWA',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: 16,
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF991B1B),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 16,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
