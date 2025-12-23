@@ -9,29 +9,74 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  late AnimationController _mainController;
   late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
+  late AnimationController _shimmerController;
+  
+  late Animation<double> _fadeIn;
+  late Animation<double> _slideUp;
+  late Animation<double> _logoScale;
+  late Animation<double> _pulse;
 
   @override
   void initState() {
     super.initState();
 
-    // Pulse animation for the logo
+    _mainController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+
+    _fadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _mainController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideUp = Tween<double>(begin: 30.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _mainController,
+        curve: const Interval(0.1, 0.6, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _logoScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _mainController,
+        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
+      ),
+    );
+
+    _pulse = Tween<double>(begin: 1.0, end: 1.02).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Navigate to login after delay
+    _mainController.forward();
+
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const LoginScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 600),
+          ),
         );
       }
     });
@@ -39,206 +84,300 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
+    _mainController.dispose();
     _pulseController.dispose();
+    _shimmerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFDC2626), // brand-red
-      body: SafeArea(
-        child: Column(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF667eea),
+              Color(0xFF5a67d8),
+              Color(0xFF764ba2),
+            ],
+          ),
+        ),
+        child: Stack(
           children: [
-            // Top Spacer
-            const Spacer(),
-
-            // Main Content: Logo & Title
-            AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _pulseAnimation.value,
-                  child: child,
-                );
-              },
-              child: _buildLogoSection(),
+            _buildBackgroundPattern(),
+            // Centered main content
+            Center(
+              child: AnimatedBuilder(
+                animation: _mainController,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _fadeIn.value,
+                    child: Transform.translate(
+                      offset: Offset(0, _slideUp.value),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLogo(),
+                    const SizedBox(height: 32),
+                    _buildAppName(),
+                  ],
+                ),
+              ),
             ),
-
-            // Bottom Section: Loader & Version
-            const Spacer(),
-            _buildBottomSection(),
+            // Bottom loading section
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: SafeArea(
+                child: AnimatedBuilder(
+                  animation: _fadeIn,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _fadeIn.value,
+                      child: child,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 40),
+                    child: _buildLoadingSection(),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLogoSection() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+  Widget _buildBackgroundPattern() {
+    return Stack(
       children: [
-        // Logo Container with decorative background
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            // Decorative blur background
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-            ),
-            // Logo Icon Container
-            Container(
-              width: 128,
-              height: 128,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
+        Positioned(
+          top: -100,
+          right: -80,
+          child: Container(
+            width: 280,
+            height: 280,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.08),
+                  Colors.transparent,
                 ],
               ),
-              child: const Icon(
-                Icons.school,
-                size: 64,
-                color: Color(0xFFDC2626),
-              ),
             ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        // Headline Text
-        const Text(
-          'LMS',
-          style: TextStyle(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: -1,
-            height: 1,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'STUDENT PORTAL',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Colors.white.withValues(alpha: 0.9),
-            letterSpacing: 4,
+        Positioned(
+          bottom: -80,
+          left: -60,
+          child: Container(
+            width: 220,
+            height: 220,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.06),
+                  Colors.transparent,
+                ],
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBottomSection() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 48),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Loading Spinner
-          const _LoadingSpinner(),
-          const SizedBox(height: 32),
-          // Footer text
-          Text(
-            'Loading resources...',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w300,
-              color: Colors.white.withValues(alpha: 0.6),
+  Widget _buildLogo() {
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _logoScale.value * _pulse.value,
+          child: child,
+        );
+      },
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 40,
+              offset: const Offset(0, 20),
+            ),
+            BoxShadow(
+              color: const Color(0xFF667eea).withValues(alpha: 0.3),
+              blurRadius: 60,
+              spreadRadius: -10,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Center(
+          child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ).createShader(bounds),
+            child: const Icon(
+              Icons.school_rounded,
+              size: 56,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'v3.0.1',
-            style: TextStyle(
-              fontSize: 10,
-              fontFamily: 'monospace',
-              color: Colors.white.withValues(alpha: 0.4),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-}
 
-class _LoadingSpinner extends StatefulWidget {
-  const _LoadingSpinner();
-
-  @override
-  State<_LoadingSpinner> createState() => _LoadingSpinnerState();
-}
-
-class _LoadingSpinnerState extends State<_LoadingSpinner>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..repeat();
+  Widget _buildAppName() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'LMS',
+          style: TextStyle(
+            fontSize: 48,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: 12,
+            height: 1,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.15),
+            ),
+          ),
+          child: const Text(
+            'STUDENT PORTAL',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 3,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.rotate(
-          angle: _controller.value * 2 * 3.14159,
-          child: Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
-                width: 3,
+  Widget _buildLoadingSection() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildProgressBar(),
+        const SizedBox(height: 16),
+        Text(
+          'Mempersiapkan aplikasi...',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withValues(alpha: 0.7),
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4ADE80),
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            child: CustomPaint(
-              painter: _SpinnerPainter(),
-            ),
+              const SizedBox(width: 8),
+              Text(
+                'Version 3.0.1',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProgressBar() {
+    return AnimatedBuilder(
+      animation: _shimmerController,
+      builder: (context, child) {
+        return Container(
+          width: 180,
+          height: 4,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: Stack(
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 2500),
+                curve: Curves.easeInOut,
+                builder: (context, value, child) {
+                  return FractionallySizedBox(
+                    widthFactor: value,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Colors.white, Color(0xFFE8E8FF)],
+                        ),
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         );
       },
     );
   }
-}
-
-class _SpinnerPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.drawArc(rect, -1.57, 1.5, false, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

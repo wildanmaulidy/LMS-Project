@@ -10,130 +10,328 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
   
-  // User name - can be edited from profile later
-  String userName = 'Moh. Wldan Maulidy';
+  String userName = 'Moh. Wildan Maulidy';
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
+    _fadeController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildUpcomingTask(),
-                      const SizedBox(height: 32),
-                      _buildAnnouncements(),
-                      const SizedBox(height: 32),
-                      _buildClassProgress(),
-                    ],
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Stack(
+          children: [
+            // Background decorations
+            _buildBackgroundDecorations(),
+            Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildQuickStats(),
+                        const SizedBox(height: 28),
+                        _buildUpcomingTask(),
+                        const SizedBox(height: 28),
+                        _buildAnnouncements(),
+                        const SizedBox(height: 28),
+                        _buildClassProgress(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          _buildBottomNavigation(),
-        ],
+              ],
+            ),
+            _buildBottomNavigation(),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildBackgroundDecorations() {
+    return Stack(
+      children: [
+        Positioned(
+          top: -100,
+          right: -100,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF667eea).withValues(alpha: 0.08),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 200,
+          left: -80,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF764ba2).withValues(alpha: 0.05),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 56, 24, 32),
-      decoration: const BoxDecoration(
-        color: Color(0xFFB92B2B),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF667eea),
+            Color(0xFF764ba2),
+          ],
         ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(35),
+          bottomRight: Radius.circular(35),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF667eea).withValues(alpha: 0.35),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
-          // Greeting & Name
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Hallo,',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontWeight: FontWeight.w300,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Selamat Datang',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text('👋', style: TextStyle(fontSize: 18)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      userName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                userName.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 1.2,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ProfilScreen()),
+                  );
+                },
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.person_rounded,
+                    color: Color(0xFF667eea),
+                    size: 28,
+                  ),
                 ),
               ),
             ],
           ),
-          // Role Badge - Tap to go to profile
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const ProfilScreen()),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.only(left: 12, right: 4, top: 4, bottom: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF7F1D1D).withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: const Color(0xFFF87171).withValues(alpha: 0.3),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4ADE80),
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'MAHASISWA',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
+                const SizedBox(width: 10),
+                const Text(
+                  'MAHASISWA AKTIF',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF991B1B),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 2,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.verified_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickStats() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.task_alt_rounded,
+            value: '12',
+            label: 'Selesai',
+            gradient: [const Color(0xFF00C9A7), const Color(0xFF00D4AA)],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.pending_actions_rounded,
+            value: '3',
+            label: 'Pending',
+            gradient: [const Color(0xFFFFA726), const Color(0xFFFFB74D)],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.school_rounded,
+            value: '7',
+            label: 'Kelas',
+            gradient: [const Color(0xFF667eea), const Color(0xFF764ba2)],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String value,
+    required String label,
+    required List<Color> gradient,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: gradient[0].withValues(alpha: 0.15),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: gradient),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: gradient[0],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF6B7280),
             ),
           ),
         ],
@@ -145,55 +343,116 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Tugas Yang Akan Datang',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF111827),
-          ),
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 22,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Tugas Mendatang',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1a1a2e),
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFFFF6B6B).withValues(alpha: 0.1),
+                    const Color(0xFFFF8E8E).withValues(alpha: 0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'URGENT',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFFF6B6B),
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFFB92B2B),
-            borderRadius: BorderRadius.circular(32),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF667eea),
+                Color(0xFF764ba2),
+                Color(0xFFf093fb),
+              ],
+              stops: [0.0, 0.6, 1.0],
+            ),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7F1D1D).withValues(alpha: 0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                color: const Color(0xFF667eea).withValues(alpha: 0.4),
+                blurRadius: 25,
+                offset: const Offset(0, 12),
               ),
             ],
           ),
           child: Stack(
             children: [
-              // Decorative blur circle
               Positioned(
-                top: -40,
-                right: -40,
+                top: -30,
+                right: -30,
                 child: Container(
-                  width: 128,
-                  height: 128,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                 ),
               ),
-              // Content
+              Positioned(
+                bottom: -20,
+                left: -20,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
               Column(
                 children: [
-                  Text(
-                    'DESAIN ANTARMUKA & PENGALAMAN PENGGUNA',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      letterSpacing: 0.5,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text(
+                      '📚 UI/UX Design',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -201,34 +460,53 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Tugas 01 - UID Android Mobile Game',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Waktu Pengumpulan',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Jumat 26 Februari, 23:59 WIB',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.schedule_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Deadline',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            const Text(
+                              'Jumat, 26 Feb • 23:59',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -245,24 +523,40 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Pengumuman Terakhir',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF111827),
+            Container(
+              width: 4,
+              height: 22,
+              decoration: BoxDecoration(
+                color: const Color(0xFF00C9A7),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
+            const SizedBox(width: 12),
+            const Text(
+              'Pengumuman',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1a1a2e),
+              ),
+            ),
+            const Spacer(),
             TextButton(
               onPressed: () {},
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                backgroundColor: const Color(0xFF667eea).withValues(alpha: 0.08),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: const Text(
                 'Lihat Semua',
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF2563EB),
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF667eea),
                 ),
               ),
             ),
@@ -272,51 +566,100 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
+            borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'Maintenance Pra UAS Semester Genap 2020/2021',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
-                  ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.campaign_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Maintenance Pra UAS',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1a1a2e),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Semester Genap 2020/2021',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFA726).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'BARU',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFFFA726),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Container(
                 width: double.infinity,
-                height: 160,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
+                height: 130,
+                margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF667eea).withValues(alpha: 0.1),
+                      const Color(0xFF764ba2).withValues(alpha: 0.1),
+                    ],
                   ),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
+                  borderRadius: BorderRadius.circular(16),
                   child: Image.network(
                     'https://lh3.googleusercontent.com/aida-public/AB6AXuCKesXwBu-Rie2tZtFz7uDTUFlUOyFFtQ7rZWRzaHuga43c_ekvksmk61okx5Akj0GX4HwAYumufRJ64RezILrbGKTvnGjFQAIe_XbPeif0eWdEbX6dZj6RAzFD4MrtfdgCuy9GJmS_R6ffsvZn9Hlf70kKx_ujRMbguLRNdhfU4lVRIDsL5XCS0SyAmOI7B5C8RvSlLwyl-hgV83z5mGocfe2UR6cVGvB0rOEFal2wvK-d5KOsY-nRashOoSxcFQ9zlt4Q9yLeU_H0',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(Icons.image, size: 48, color: Colors.grey),
+                      return Center(
+                        child: Icon(Icons.image_rounded, size: 40, color: Colors.grey[400]),
                       );
                     },
                   ),
@@ -331,181 +674,157 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildClassProgress() {
     final classes = [
-      ClassItem(
-        title: 'DESAIN ANTARMUKA & PENGALAMAN PENGGUNA D4SM-42-03 [ADY]',
-        semester: '2021/2',
-        progress: 89,
-        gradientColors: [const Color(0xFFFBBF24), const Color(0xFFF97316)],
-        icon: 'uiUX',
-      ),
-      ClassItem(
-        title: 'KEWARGANEGARAAN\nD4SM-41-GAB1 [BBO]. JUMAT 2',
-        semester: '2021/2',
-        progress: 86,
-        imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBV4qQTmja5L7J4I5r_SY4k5-ABqgCaEFnU-g-9d77hOzhLGBzvNxpon1wHmlVwYHfbUmymt1LZdmFx8aieMj49r1mJsUvWz8b5UeuMgkcSEqALomRQW6RmfoM7aBoswoAxxbOR8DvepSrX7RFLBaTOImvv9iUfx-705Q1_ZwZ_cOSRJFtDHNatL-bDx5I70_oqlT41BScIPWr7wEvSZQSqsvAj9fXBRjAfIhMXE03_kh6vvvpq2BvhblygwgsRB3lTh8icONvCQPYI',
-      ),
-      ClassItem(
-        title: 'SISTEM OPERASI\nD4SM-44-02 [DDS]',
-        semester: '2021/2',
-        progress: 90,
-        imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCLh12c5olR28oZSbdYWDZu_EBoUennT47EpBAy7SMdWrzDz8zrW1QXKSfDGchVCEQ5cZ6MXzcbLALRjgmVTYVz4JERRlglvQTHLUw2xuC-PAchm2VuKhtZNw4H7RNTk06pFPir5q3ZgGfCn74rKeJC43UimM6Z8lh9dLkuNs8qBPSinmWEX1ljsuooJYWl4xiuAdzki_5DJ-IM63PF9ZYYM71xd39vUfgdHRVps6WuFIGj1EGgCHK31Ja0rc44h7dBNS6D8zGs5Fnk',
-      ),
-      ClassItem(
-        title: 'PEMROGRAMAN PERANGKAT BERGERAK MULTIMEDIA D4SM-41-GAB1 [APJ]',
-        semester: '2021/2',
-        progress: 90,
-        gradientColors: [const Color(0xFF5EEAD4), const Color(0xFF22D3EE)],
-      ),
-      ClassItem(
-        title: 'BAHASA INGGRIS: BUSINESS AND SCIENTIFIC D4SM-41-GAB1 [ARS]',
-        semester: '2021/2',
-        progress: 90,
-        gradientColors: [const Color(0xFFD1D5DB), const Color(0xFF9CA3AF)],
-      ),
-      ClassItem(
-        title: 'PEMROGRAMAN MULTIMEDIA INTERAKTIF D4SM-43-04 [TPR]',
-        semester: '2021/2',
-        progress: 90,
-        gradientColors: [const Color(0xFF3B82F6), const Color(0xFF60A5FA)],
-      ),
-      ClassItem(
-        title: 'OLAH RAGA\nD3TT-44-02 [EYR]',
-        semester: '2021/2',
-        progress: 90,
-        gradientColors: [const Color(0xFFA855F7), const Color(0xFF6366F1)],
-      ),
+      _ClassData('UI/UX Design', 'D4SM-42-03', 89, const Color(0xFF667eea), Icons.design_services_rounded),
+      _ClassData('Kewarganegaraan', 'D4SM-41-GAB1', 86, const Color(0xFF00C9A7), Icons.public_rounded),
+      _ClassData('Sistem Operasi', 'D4SM-44-02', 90, const Color(0xFF764ba2), Icons.memory_rounded),
+      _ClassData('Mobile Programming', 'D4SM-41-GAB1', 90, const Color(0xFFFFA726), Icons.phone_android_rounded),
+      _ClassData('Bahasa Inggris', 'D4SM-41-GAB1', 90, const Color(0xFFFF6B6B), Icons.translate_rounded),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Progres Kelas',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF111827),
-          ),
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 22,
+              decoration: BoxDecoration(
+                color: const Color(0xFF764ba2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Progres Kelas',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1a1a2e),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
-        ...classes.map((classItem) => _buildClassCard(classItem)),
+        const SizedBox(height: 16),
+        ...classes.asMap().entries.map((entry) => _buildClassCard(entry.value, entry.key)),
       ],
     );
   }
 
-  Widget _buildClassCard(ClassItem classItem) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Thumbnail
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: classItem.gradientColors != null
-                  ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: classItem.gradientColors!,
-                    )
-                  : null,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: classItem.imageUrl != null
-                  ? Image.network(
-                      classItem.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, color: Colors.grey),
-                        );
-                      },
-                    )
-                  : classItem.icon != null
-                      ? Center(
-                          child: Text(
-                            classItem.icon!,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              fontStyle: FontStyle.italic,
-                              color: Colors.white,
-                            ),
-                          ),
-                        )
-                      : null,
-            ),
+  Widget _buildClassCard(_ClassData data, int index) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 400 + (index * 80)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 15 * (1 - value)),
+            child: child,
           ),
-          const SizedBox(width: 16),
-          // Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  classItem.semester,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF6B7280),
-                  ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: data.color.withValues(alpha: 0.12),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [data.color, data.color.withValues(alpha: 0.7)],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  classItem.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF111827),
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                // Progress bar
-                Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE5E7EB),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: classItem.progress / 100,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFB92B2B),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(data.icon, color: Colors.white, size: 26),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1a1a2e),
                     ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${classItem.progress} % Selesai',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6B7280),
+                  const SizedBox(height: 4),
+                  Text(
+                    data.code,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[500],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: data.progress / 100),
+                    duration: Duration(milliseconds: 800 + (index * 100)),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, _) {
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0F0F5),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: value,
+                            child: Container(
+                              height: 6,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [data.color, data.color.withValues(alpha: 0.7)],
+                                ),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: data.color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${data.progress}%',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: data.color,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -515,39 +834,43 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(
-              color: Color(0xFFB92B2B),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(40),
-                topRight: Radius.circular(40),
+      child: Container(
+        padding: const EdgeInsets.only(top: 15),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFF5F7FA).withValues(alpha: 0),
+              const Color(0xFFF5F7FA),
+            ],
+          ),
+        ),
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF667eea).withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 20,
-                  offset: Offset(0, -5),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(Icons.home, 'Home', 0),
-                _buildNavItem(Icons.school, 'Kelas Saya', 1),
-                _buildNavItem(Icons.notifications, 'Notifikasi', 2),
-              ],
-            ),
+            ],
           ),
-          Container(
-            height: 24,
-            color: const Color(0xFFB92B2B),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.home_rounded, 'Home', 0),
+              _buildNavItem(Icons.school_rounded, 'Kelas', 1),
+              _buildNavItem(Icons.notifications_rounded, 'Notifikasi', 2),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -557,12 +880,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () {
         if (index == 1) {
-          // Navigate to Kelas Screen
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const KelasScreen()),
           );
         } else if (index == 2) {
-          // Navigate to Notifikasi Screen
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const NotifikasiScreen()),
           );
@@ -572,43 +893,48 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 28,
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 18 : 14,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: Colors.white,
             ),
-          ),
-        ],
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class ClassItem {
-  final String title;
-  final String semester;
+class _ClassData {
+  final String name;
+  final String code;
   final int progress;
-  final List<Color>? gradientColors;
-  final String? imageUrl;
-  final String? icon;
+  final Color color;
+  final IconData icon;
 
-  ClassItem({
-    required this.title,
-    required this.semester,
-    required this.progress,
-    this.gradientColors,
-    this.imageUrl,
-    this.icon,
-  });
+  _ClassData(this.name, this.code, this.progress, this.color, this.icon);
 }
