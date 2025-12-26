@@ -386,7 +386,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
               'Notifikasi',
               'Pengaturan notifikasi',
               const Color(0xFFFFA726),
-              onTap: () {},
+              onTap: () => _showNotificationSettingsDialog(),
             ),
             _buildDivider(),
             _buildMenuItem(
@@ -394,7 +394,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
               'Bantuan',
               'Pusat bantuan & FAQ',
               const Color(0xFF00C9A7),
-              onTap: () {},
+              onTap: () => _showHelpDialog(),
             ),
             _buildDivider(),
             _buildMenuItem(
@@ -796,6 +796,277 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF667eea),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNotificationSettingsDialog() {
+    bool pushEnabled = true;
+    bool emailEnabled = false;
+    bool tugasNotif = true;
+    bool pengumumanNotif = true;
+    bool nilaiNotif = true;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(28),
+              topRight: Radius.circular(28),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Pengaturan Notifikasi',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1a1a2e),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSwitchTile('Push Notification', 'Terima notifikasi di perangkat', pushEnabled, (val) {
+                  setModalState(() => pushEnabled = val);
+                }),
+                _buildSwitchTile('Email Notification', 'Terima notifikasi via email', emailEnabled, (val) {
+                  setModalState(() => emailEnabled = val);
+                }),
+                const Divider(height: 32),
+                const Text(
+                  'Jenis Notifikasi',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF6B7280),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildSwitchTile('Tugas Baru', 'Notifikasi ketika ada tugas baru', tugasNotif, (val) {
+                  setModalState(() => tugasNotif = val);
+                }),
+                _buildSwitchTile('Pengumuman', 'Notifikasi pengumuman dari dosen', pengumumanNotif, (val) {
+                  setModalState(() => pengumumanNotif = val);
+                }),
+                _buildSwitchTile('Nilai', 'Notifikasi ketika nilai keluar', nilaiNotif, (val) {
+                  setModalState(() => nilaiNotif = val);
+                }),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Pengaturan notifikasi disimpan'),
+                          backgroundColor: const Color(0xFF00C9A7),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFA726),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'Simpan',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile(String title, String subtitle, bool value, Function(bool) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1a1a2e),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: const Color(0xFF667eea),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Pusat Bantuan',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1a1a2e),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildHelpItem(Icons.school_rounded, 'Tentang LMS', 'Learning Management System untuk mahasiswa'),
+              _buildHelpItem(Icons.assignment_rounded, 'Cara Mengumpulkan Tugas', 'Pilih kelas > Tugas > Upload file'),
+              _buildHelpItem(Icons.notifications_rounded, 'Notifikasi', 'Aktifkan notifikasi untuk info terbaru'),
+              _buildHelpItem(Icons.password_rounded, 'Lupa Password?', 'Hubungi admin untuk reset password'),
+              _buildHelpItem(Icons.email_rounded, 'Hubungi Kami', 'support@university.ac.id'),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00C9A7),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Tutup',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHelpItem(IconData icon, String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF00C9A7).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFF00C9A7), size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1a1a2e),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
