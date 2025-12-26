@@ -17,13 +17,13 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(const Duration(milliseconds: 1000));
 
-    // Validate credentials
-    if (email.isEmpty || password.isEmpty) {
+    // Only validate that email is not empty
+    if (email.isEmpty) {
       return {
         'success': false,
-        'message': 'Email dan password tidak boleh kosong',
+        'message': 'Email tidak boleh kosong',
       };
     }
 
@@ -34,36 +34,27 @@ class AuthService {
       };
     }
 
-    if (password.length < 6) {
-      return {
-        'success': false,
-        'message': 'Password minimal 6 karakter',
-      };
-    }
+    // Accept any email - create user with email as name
+    final userName = email.split('@').first.replaceAll('.', ' ');
+    final formattedName = userName.split(' ').map((word) => 
+      word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : ''
+    ).join(' ');
 
-    // Check dummy credentials (in real app, this would be API call)
-    if (email.toLowerCase() == _dummyEmail && password == _dummyPassword) {
-      _currentUser = UserModel(
-        id: '1',
-        nama: 'Wildan Maulidy',
-        email: email,
-        nim: '2024123456',
-        jurusan: 'Teknik Informatika',
-        semester: 'Semester 5',
-        phone: '081234567890',
-      );
-      _isLoggedIn = true;
-
-      return {
-        'success': true,
-        'message': 'Login berhasil',
-        'user': _currentUser,
-      };
-    }
+    _currentUser = UserModel(
+      id: '1',
+      nama: formattedName.isNotEmpty ? formattedName : 'Mahasiswa',
+      email: email,
+      nim: '2024123456',
+      jurusan: 'Teknik Informatika',
+      semester: 'Semester 5',
+      phone: '081234567890',
+    );
+    _isLoggedIn = true;
 
     return {
-      'success': false,
-      'message': 'Email atau password salah',
+      'success': true,
+      'message': 'Login berhasil',
+      'user': _currentUser,
     };
   }
 
