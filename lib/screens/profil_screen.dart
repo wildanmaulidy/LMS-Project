@@ -1077,7 +1077,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'Keluar',
@@ -1089,7 +1090,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
         content: const Text('Apakah Anda yakin ingin keluar dari akun?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Batal',
               style: TextStyle(
@@ -1099,15 +1100,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _authService.logout();
-              if (mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  (route) => false,
-                );
-              }
+            onPressed: () {
+              // Close dialog first
+              Navigator.pop(dialogContext);
+              // Logout and go to login
+              _authService.logout();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFF6B6B),
