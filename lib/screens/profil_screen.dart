@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
+import '../services/data_service.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -11,8 +12,10 @@ class ProfilScreen extends StatefulWidget {
 
 class _ProfilScreenState extends State<ProfilScreen> {
   final _authService = AuthService();
+  final _dataService = DataService();
   
   String get userName => _authService.currentUser?.nama ?? 'Mahasiswa';
+  // ... existing getters ...
   String get nim => _authService.currentUser?.nim ?? '-';
   String get email => _authService.currentUser?.email ?? '-';
   String get jurusan => _authService.currentUser?.jurusan ?? '-';
@@ -38,6 +41,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
   }
 
+  // ... _buildHeader ...
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 56, 20, 40),
@@ -245,6 +249,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
   }
 
+  // ... _buildProfileInfo ...
   Widget _buildProfileInfo() {
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -387,6 +392,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
               'Pengaturan notifikasi',
               const Color(0xFFFFA726),
               onTap: () => _showNotificationSettingsDialog(),
+              badgeCount: _dataService.unreadNotificationCount, // Add badge count
             ),
             _buildDivider(),
             _buildMenuItem(
@@ -420,7 +426,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
   }
 
   Widget _buildMenuItem(IconData icon, String title, String subtitle, Color color,
-      {bool isLogout = false, VoidCallback? onTap}) {
+      {bool isLogout = false, VoidCallback? onTap, int badgeCount = 0}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -469,6 +475,24 @@ class _ProfilScreenState extends State<ProfilScreen> {
                   ],
                 ),
               ),
+              if (badgeCount > 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF6B6B),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$badgeCount',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
               Icon(
                 Icons.chevron_right_rounded,
                 color: isLogout ? const Color(0xFFFF6B6B) : Colors.grey[400],
