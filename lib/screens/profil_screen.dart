@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
+import '../services/auth_service.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -8,13 +10,15 @@ class ProfilScreen extends StatefulWidget {
 }
 
 class _ProfilScreenState extends State<ProfilScreen> {
-  String userName = 'Moh. Wildan Maulidy';
-  String nim = '2022020100018';
-  String email = 'wildan.maulidy@student.university.ac.id';
-  String jurusan = 'Teknik Informatika';
-  String fakultas = 'Fakultas Teknik';
-  String angkatan = '2022';
-  String noTelp = '081234567890';
+  final _authService = AuthService();
+  
+  String get userName => _authService.currentUser?.nama ?? 'Mahasiswa';
+  String get nim => _authService.currentUser?.nim ?? '-';
+  String get email => _authService.currentUser?.email ?? '-';
+  String get jurusan => _authService.currentUser?.jurusan ?? '-';
+  String get fakultas => 'Fakultas Teknik';
+  String get angkatan => _authService.currentUser?.semester.toString() ?? '-';
+  String get noTelp => _authService.currentUser?.noTelp ?? '-';
 
   @override
   Widget build(BuildContext context) {
@@ -818,9 +822,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              await _authService.logout();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFF6B6B),
