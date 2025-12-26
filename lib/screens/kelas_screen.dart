@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'notifikasi_screen.dart';
+import 'detail_kelas_screen.dart';
+import '../services/data_service.dart';
+import '../models/kelas_model.dart';
 
 class KelasScreen extends StatefulWidget {
   const KelasScreen({super.key});
@@ -11,72 +14,15 @@ class KelasScreen extends StatefulWidget {
 class _KelasScreenState extends State<KelasScreen> {
   int _selectedIndex = 1;
   String _selectedFilter = 'Semua';
+  final _dataService = DataService();
 
-  final List<KelasItem> _kelasList = [
-    KelasItem(
-      title: 'Desain Antarmuka & Pengalaman Pengguna',
-      code: 'D4SM-42-03 [ADY]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 89,
-      color: const Color(0xFF667eea),
-      icon: Icons.design_services_rounded,
-      tasks: 3,
-    ),
-    KelasItem(
-      title: 'Kewarganegaraan',
-      code: 'D4SM-41-GAB1 [BBO]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 86,
-      color: const Color(0xFF00C9A7),
-      icon: Icons.public_rounded,
-      tasks: 2,
-    ),
-    KelasItem(
-      title: 'Sistem Operasi',
-      code: 'D4SM-44-02 [DDS]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 90,
-      color: const Color(0xFF764ba2),
-      icon: Icons.memory_rounded,
-      tasks: 1,
-    ),
-    KelasItem(
-      title: 'Pemrograman Perangkat Bergerak',
-      code: 'D4SM-41-GAB1 [APJ]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 90,
-      color: const Color(0xFFFFA726),
-      icon: Icons.phone_android_rounded,
-      tasks: 0,
-    ),
-    KelasItem(
-      title: 'Bahasa Inggris: Business',
-      code: 'D4SM-41-GAB1 [ARS]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 90,
-      color: const Color(0xFFFF6B6B),
-      icon: Icons.translate_rounded,
-      tasks: 1,
-    ),
-    KelasItem(
-      title: 'Pemrograman Multimedia Interaktif',
-      code: 'D4SM-43-04 [TPR]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 90,
-      color: const Color(0xFF5C6BC0),
-      icon: Icons.video_library_rounded,
-      tasks: 2,
-    ),
-    KelasItem(
-      title: 'Olah Raga',
-      code: 'D3TT-44-02 [EYR]',
-      semester: 'Semester Genap 2021/2022',
-      progress: 90,
-      color: const Color(0xFFEC407A),
-      icon: Icons.sports_basketball_rounded,
-      tasks: 0,
-    ),
-  ];
+  List<KelasModel> get _filteredKelas {
+    return _dataService.getKelasByKategori(_selectedFilter);
+  }
+
+  List<String> get _filters {
+    return _dataService.kategoriList;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,9 +39,9 @@ class _KelasScreenState extends State<KelasScreen> {
                 child: ListView.builder(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                  itemCount: _kelasList.length,
+                  itemCount: _filteredKelas.length,
                   itemBuilder: (context, index) {
-                    return _buildKelasCard(_kelasList[index], index);
+                    return _buildKelasCard(_filteredKelas[index], index);
                   },
                 ),
               ),
@@ -256,7 +202,6 @@ class _KelasScreenState extends State<KelasScreen> {
   }
 
   Widget _buildFilterChips() {
-    final filters = ['Semua', 'Aktif', 'Selesai'];
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: SingleChildScrollView(
@@ -264,7 +209,7 @@ class _KelasScreenState extends State<KelasScreen> {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
-          children: filters.map((filter) {
+          children: _filters.map((filter) {
             final isSelected = _selectedFilter == filter;
             return GestureDetector(
               onTap: () => setState(() => _selectedFilter = filter),
@@ -306,7 +251,11 @@ class _KelasScreenState extends State<KelasScreen> {
     );
   }
 
-  Widget _buildKelasCard(KelasItem kelas, int index) {
+  Widget _buildKelasCard(KelasModel kelas, int index) {
+    final primaryColor = kelas.gradientColors.isNotEmpty 
+        ? kelas.gradientColors[0] 
+        : const Color(0xFF667eea);
+    
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: Duration(milliseconds: 400 + (index * 60)),
@@ -327,7 +276,7 @@ class _KelasScreenState extends State<KelasScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: kelas.color.withValues(alpha: 0.12),
+              color: primaryColor.withValues(alpha: 0.12),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -336,7 +285,14 @@ class _KelasScreenState extends State<KelasScreen> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailKelasScreen(kelasId: kelas.id),
+                ),
+              );
+            },
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -348,12 +304,12 @@ class _KelasScreenState extends State<KelasScreen> {
                     height: 60,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [kelas.color, kelas.color.withValues(alpha: 0.7)],
+                        colors: kelas.gradientColors,
                       ),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: kelas.color.withValues(alpha: 0.3),
+                          color: primaryColor.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -368,7 +324,7 @@ class _KelasScreenState extends State<KelasScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          kelas.title,
+                          kelas.nama,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -379,7 +335,7 @@ class _KelasScreenState extends State<KelasScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          kelas.code,
+                          kelas.kode,
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey[500],
@@ -399,12 +355,12 @@ class _KelasScreenState extends State<KelasScreen> {
                                     ),
                                   ),
                                   FractionallySizedBox(
-                                    widthFactor: kelas.progress / 100,
+                                    widthFactor: kelas.progress,
                                     child: Container(
                                       height: 6,
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
-                                          colors: [kelas.color, kelas.color.withValues(alpha: 0.7)],
+                                          colors: kelas.gradientColors,
                                         ),
                                         borderRadius: BorderRadius.circular(3),
                                       ),
@@ -415,11 +371,11 @@ class _KelasScreenState extends State<KelasScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              '${kelas.progress}%',
+                              '${(kelas.progress * 100).toInt()}%',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: kelas.color,
+                                color: primaryColor,
                               ),
                             ),
                           ],
@@ -429,7 +385,7 @@ class _KelasScreenState extends State<KelasScreen> {
                   ),
                   const SizedBox(width: 8),
                   // Tasks badge
-                  if (kelas.tasks > 0)
+                  if (kelas.tugasList.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
@@ -446,7 +402,7 @@ class _KelasScreenState extends State<KelasScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${kelas.tasks}',
+                            '${kelas.tugasList.where((t) => !t.sudahDikumpulkan).length}',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -555,24 +511,4 @@ class _KelasScreenState extends State<KelasScreen> {
       ),
     );
   }
-}
-
-class KelasItem {
-  final String title;
-  final String code;
-  final String semester;
-  final int progress;
-  final Color color;
-  final IconData icon;
-  final int tasks;
-
-  KelasItem({
-    required this.title,
-    required this.code,
-    required this.semester,
-    required this.progress,
-    required this.color,
-    required this.icon,
-    required this.tasks,
-  });
 }
