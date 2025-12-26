@@ -135,15 +135,23 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     ),
                   ],
                 ),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person_rounded,
-                    size: 55,
-                    color: Color(0xFF667eea),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/foto profil.jpg',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.person_rounded,
+                          size: 55,
+                          color: Color(0xFF667eea),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

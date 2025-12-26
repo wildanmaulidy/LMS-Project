@@ -204,10 +204,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.person_rounded,
-                    color: Color(0xFF667eea),
-                    size: 28,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/images/foto profil.jpg',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.person_rounded,
+                          color: Color(0xFF667eea),
+                          size: 28,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
