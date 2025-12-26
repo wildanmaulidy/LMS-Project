@@ -18,7 +18,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
   String get jurusan => _authService.currentUser?.jurusan ?? '-';
   String get fakultas => 'Fakultas Teknik';
   String get angkatan => _authService.currentUser?.semester.toString() ?? '-';
-  String get noTelp => _authService.currentUser?.noTelp ?? '-';
+  String get noTelp => _authService.currentUser?.phone ?? '-';
 
   @override
   Widget build(BuildContext context) {
@@ -536,10 +536,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      userName = nameController.text;
-                      noTelp = phoneController.text;
-                    });
+                    // Note: In a real app, this would update via auth service
+                    // For demo purposes, we just show success message
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
