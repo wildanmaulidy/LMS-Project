@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'kelas_screen.dart';
 import 'notifikasi_screen.dart';
 import 'profil_screen.dart';
+import '../services/auth_service.dart';
+import '../services/data_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,7 +17,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   
-  String userName = 'Moh. Wildan Maulidy';
+  final _authService = AuthService();
+  final _dataService = DataService();
+
+  String get userName => _authService.currentUser?.nama ?? 'Mahasiswa';
 
   @override
   void initState() {
@@ -254,12 +259,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildQuickStats() {
+    final totalTugas = _dataService.totalTugas;
+    final tugasBelumSelesai = _dataService.tugasBelumSelesai;
+    final tugasSelesai = totalTugas - tugasBelumSelesai;
+    
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             icon: Icons.task_alt_rounded,
-            value: '12',
+            value: '$tugasSelesai',
             label: 'Selesai',
             gradient: [const Color(0xFF00C9A7), const Color(0xFF00D4AA)],
           ),
@@ -268,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Expanded(
           child: _buildStatCard(
             icon: Icons.pending_actions_rounded,
-            value: '3',
+            value: '$tugasBelumSelesai',
             label: 'Pending',
             gradient: [const Color(0xFFFFA726), const Color(0xFFFFB74D)],
           ),
@@ -277,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Expanded(
           child: _buildStatCard(
             icon: Icons.school_rounded,
-            value: '7',
+            value: '${_dataService.totalKelas}',
             label: 'Kelas',
             gradient: [const Color(0xFF667eea), const Color(0xFF764ba2)],
           ),
